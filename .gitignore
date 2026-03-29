@@ -1,0 +1,8 @@
+node_modules/
+dist/
+public/assets/audio/
+public/assets/fonts/
+.wrangler/
+.DS_Store
+*.wav
+*.mp3
