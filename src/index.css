@@ -153,14 +153,18 @@ html, body, #root {
 .clock-area { grid-column: 2 / 4; grid-row: 2; align-self: end; justify-self: end; padding-right: 4px; }
 
 @media (max-width: 768px) {
-  .app-container { inset: 10px; gap: 6px; }
-  .main-area { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 8px; }
+  .app-container { inset: 8px; gap: 4px; display: flex; flex-direction: column; align-items: center; }
+  .main-area { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 6px; width: 100%; }
   .title-area { grid-column: 1; grid-row: 1; text-align: center; padding: 2px 0 0 0; }
   .streamed-area { grid-column: 1; grid-row: 2; }
   .folder-area { grid-column: 1; grid-row: 3; display: flex; justify-content: center; }
   .clock-area { display: none; }
-  .folder-static { width: 100% !important; max-width: 340px; }
-  .player-bar { padding: 6px 12px !important; }
-  .player-bar .flex-1 { display: block !important; }
-  .r3f-bg canvas { transform: scale(1.2); transform-origin: center center; }
+  .folder-static { width: 280px !important; max-width: 85vw; height: 340px; }
+  .player-bar { padding: 6px 10px !important; width: 92% !important; min-width: unset !important; }
+  .r3f-bg canvas { transform: scale(1.3); transform-origin: center center; }
+  /* Mobile volume popup */
+  .vol-popup { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px;
+    background: rgba(8,10,18,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(200,210,225,0.1);
+    border-radius: 10px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .vol-popup .vol-slider { transform: rotate(-90deg); width: 80px; margin: 30px 0; }
 }
