@@ -153,10 +153,14 @@ html, body, #root {
 .clock-area { grid-column: 2 / 4; grid-row: 2; align-self: end; justify-self: end; padding-right: 4px; }
 
 @media (max-width: 768px) {
-  .app-container { inset: 14px; gap: 6px; }
+  .app-container { inset: 10px; gap: 6px; }
   .main-area { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 8px; }
   .title-area { grid-column: 1; grid-row: 1; text-align: center; padding: 2px 0 0 0; }
   .streamed-area { grid-column: 1; grid-row: 2; }
-  .folder-area { grid-column: 1; grid-row: 3; }
+  .folder-area { grid-column: 1; grid-row: 3; display: flex; justify-content: center; }
   .clock-area { display: none; }
+  .folder-static { width: 100% !important; max-width: 340px; }
+  .player-bar { padding: 6px 12px !important; }
+  .player-bar .flex-1 { display: block !important; }
+  .r3f-bg canvas { transform: scale(1.2); transform-origin: center center; }
 }
