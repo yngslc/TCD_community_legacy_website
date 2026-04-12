@@ -6,15 +6,15 @@ import * as THREE from 'three'
 // ═══ STAR PARTICLES — thousands of twinkling points ═══
 function StarField() {
   const ref = useRef()
-  const count = 2500
+  const count = 10000
 
   const [positions, sizes, phases] = useMemo(() => {
-    const pos = new Float32Array(count * 3)
+    const pos = new Float32Array(count)
     const sz = new Float32Array(count)
     const ph = new Float32Array(count)
     for (let i = 0; i < count; i++) {
       // Distribute in a large sphere
-      const theta = Math.random() * Math.PI * 2
+      const theta = Math.random() * Math.PI * 1.35
       const phi = Math.acos(2 * Math.random() - 1)
       const r = 8 + Math.random() * 40
       pos[i*3] = r * Math.sin(phi) * Math.cos(theta)
@@ -64,7 +64,7 @@ function Orb({ position, size, opacity, featured, onClick, orbRef }) {
 
   useFrame(({ clock }) => {
     if (glowRef.current) {
-      const pulse = 1 + 0.05 * Math.sin(clock.elapsedTime * 0.5)
+      const pulse = 1 + 0.05 * Math.sin(clock.elapsedTime * 0.2 + size * 10)
       glowRef.current.scale.setScalar(pulse)
     }
   })
@@ -77,7 +77,7 @@ function Orb({ position, size, opacity, featured, onClick, orbRef }) {
         <meshBasicMaterial
           color="#b0bcd8"
           transparent
-          opacity={opacity * (featured ? 0.06 : 0.03)}
+          opacity={opacity * (featured ? 0.08 : 0.05)}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -95,7 +95,7 @@ function Orb({ position, size, opacity, featured, onClick, orbRef }) {
           color="#c8d0e0"
           emissive="#8090b0"
           emissiveIntensity={featured ? 0.3 : 0.15}
-          roughness={0.3}
+          roughness={0.55}
           metalness={0.6}
           transparent
           opacity={opacity}
@@ -144,12 +144,12 @@ function OrbitalSystem({ onOrbClick }) {
   const orbData = useMemo(() => {
     const orbs = []
     let id = 0
-    const arms = 2
+    const arms = 7
 
     // Spiral arms
     for (let arm = 0; arm < arms; arm++) {
       const armOff = (arm / arms) * Math.PI * 2
-      const orbCount = 20
+      const orbCount = 50
       for (let i = 0; i < orbCount; i++) {
         const t = i / orbCount
         const angle = armOff + t * Math.PI * 2.8
@@ -169,15 +169,15 @@ function OrbitalSystem({ onOrbClick }) {
     }
 
     // Center cluster
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 40; i++) {
       const a = Math.random()*Math.PI*2
       const r = Math.random()*1.2
       orbs.push({
         id: id++, angle: a, radius: r,
-        size: 0.03 + Math.random()*0.1,
+        size: 0.25 + Math.random()*0.1,
         featured: false,
-        speed: 0.03 + Math.random()*0.02,
-        opacity: 0.3 + Math.random()*0.4,
+        speed: 0.025 + Math.random()*0.02,
+        opacity: 0.4 + Math.random()*0.4,
         jitter: [(Math.random()-0.5)*0.2, (Math.random()-0.5)*0.2, (Math.random()-0.5)*0.15],
       })
     }
@@ -317,7 +317,7 @@ function CenterGlow() {
       <meshBasicMaterial
         color="#a0b0d0"
         transparent
-        opacity={0.04}
+        opacity={100} 
         blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
@@ -359,7 +359,7 @@ function Scene({ onOrbClick }) {
   return (
     <>
       <color attach="background" args={['#030208']} />
-      <ambientLight intensity={0.15} />
+      <ambientLight intensity={0.1} />
       <pointLight position={[0, 0, 3]} intensity={0.8} color="#c0d0f0" />
       <pointLight position={[0, 0, -2]} intensity={0.3} color="#8090b0" />
 

@@ -12,8 +12,8 @@ export default {
           bg: '#0E0B08',
           surface: 'rgba(255,255,255,0.05)',
           border: 'rgba(255,255,255,0.08)',
-          gold: '#C8A84E',
-          text: '#E8E0D0',
+          gold: '#b9dfde',
+          text: '#bfddd7',
           muted: 'rgba(255,255,255,0.4)',
           dim: 'rgba(255,255,255,0.15)',
         }

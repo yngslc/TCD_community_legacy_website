@@ -10,14 +10,14 @@ export default function CosmicCanvas({ onOrbClick }) {
     const canvas = canvasRef.current, ctx = canvas.getContext('2d')
     let w, h, cx, cy, animId, dpr
 
-    const stars = Array.from({length:700},()=>({ x:Math.random(),y:Math.random(),r:0.15+Math.random()*0.8,b:0.15+Math.random()*0.6,sp:0.3+Math.random()*2.5,off:Math.random()*Math.PI*2 }))
+    const stars = Array.from({length:625},()=>({ x:Math.random(),y:Math.random(),r:0.15+Math.random()*0.8,b:0.15+Math.random()*0.6,sp:0.3+Math.random()*2.5,off:Math.random()*Math.PI*2 }))
     const sparkles = Array.from({length:40},()=>({ x:Math.random(),y:Math.random(),r:1+Math.random()*2,b:0.5+Math.random()*0.5,sp:0.8+Math.random()*1.5,off:Math.random()*Math.PI*2 }))
 
     const orbs = []; let oid = 0
-    for (let arm = 0; arm < 2; arm++) {
-      const ao = (arm/2)*Math.PI*2
-      for (let i = 0; i < 18; i++) {
-        const t = i/18, th = ao+t*Math.PI*3.5, sr = 0.04+t*0.38+(Math.random()-0.5)*0.03
+    for (let arm = 0; arm < 7; arm++) {
+      const ao = (arm/7)*Math.PI*2
+      for (let i = 0; i < 50; i++) {
+        const t = i/50, th = ao+t*Math.PI*3.5, sr = 0.04+t*0.38+(Math.random()-0.5)*0.03
         const sz = t<0.15?2+Math.random()*5:t<0.4?4+Math.random()*10:t<0.7?8+Math.random()*18:15+Math.random()*28
         orbs.push({id:oid++,theta:th,spiralR:sr,size:sz,featured:false,opacity:0.3+t*0.5,sm:0.8+Math.random()*0.4})
       }
