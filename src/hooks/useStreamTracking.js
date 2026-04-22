@@ -34,8 +34,12 @@ export function useStreamTracking(audioRef, currentTrack) {
 
     const onTimeUpdate = () => {
       if (countedForCurrentPlay.current) return
-      if (audio.currentTime >= STREAM_THRESHOLD_SECONDS) {
+      // Guard against bogus currentTime values (seeking quirks / corrupt media)
+      const t = Number(audio.currentTime)
+      if (!Number.isFinite(t) || t < 0) return
+      if (t >= STREAM_THRESHOLD_SECONDS) {
         countedForCurrentPlay.current = true
+        // recordStream itself validates the track id and throttles abuse.
         recordStream(currentTrack.id)
       }
     }
