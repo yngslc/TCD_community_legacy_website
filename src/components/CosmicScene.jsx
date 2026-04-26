@@ -34,53 +34,6 @@ function IntroController() {
   return null
 }
 
-// ═══ SHOOTING STARS ═══
-// Only visible while intro.progress < 1. A small pool of line segments is
-// continuously respawned: each streak starts at a random far edge and flies
-// across the scene; head/tail positions are written per-frame.
-function ShootingStars(){
-  const COUNT=350
-  const ref=useRef()
-  const matRef=useRef()
-  const positions=useMemo(()=>new Float32Array(COUNT*6),[])
-  const makeStreak=()=>{
-    const angle=Math.random()*Math.PI*2
-    const far=18+Math.random()*10
-    const sx=Math.cos(angle)*far, sz=Math.sin(angle)*far, sy=(Math.random()-.5)*10
-    const tAng=angle+Math.PI+(Math.random()-.5)*0.9
-    const tx=Math.cos(tAng)*far, tz=Math.sin(tAng)*far, ty=(Math.random()-.5)*10
-    const len=Math.hypot(tx-sx,ty-sy,tz-sz)||1
-    return{sx,sy,sz,dx:(tx-sx)/len,dy:(ty-sy)/len,dz:(tz-sz)/len,
-      speed:22+Math.random()*22, life:0,
-      maxLife:.5+Math.random()*.9,
-      delay:Math.random()*2.5,
-      trail:2.2+Math.random()*2.8}
-  }
-  const state=useMemo(()=>Array.from({length:COUNT},makeStreak),[])
-  useFrame((_,delta)=>{
-    if(!ref.current)return
-    if(intro.progress>=1){if(matRef.current&&matRef.current.opacity>0)matRef.current.opacity=Math.max(0,matRef.current.opacity-delta*2);return}
-    for(let i=0;i<COUNT;i++){
-      const s=state[i]
-      if(s.delay>0){s.delay-=delta;positions[i*6]=positions[i*6+3]=9999;positions[i*6+1]=positions[i*6+4]=9999;positions[i*6+2]=positions[i*6+5]=9999;continue}
-      s.life+=delta
-      if(s.life>s.maxLife){Object.assign(s,makeStreak());continue}
-      const d=s.life*s.speed
-      const hx=s.sx+s.dx*d, hy=s.sy+s.dy*d, hz=s.sz+s.dz*d
-      const td=Math.max(0,d-s.trail)
-      const tx=s.sx+s.dx*td, ty=s.sy+s.dy*td, tz=s.sz+s.dz*td
-      positions[i*6]=tx;positions[i*6+1]=ty;positions[i*6+2]=tz
-      positions[i*6+3]=hx;positions[i*6+4]=hy;positions[i*6+5]=hz
-    }
-    ref.current.geometry.attributes.position.needsUpdate=true
-    if(matRef.current)matRef.current.opacity=(1-intro.progress*.6)*.95
-  })
-  return(<lineSegments ref={ref}>
-    <bufferGeometry><bufferAttribute attach="attributes-position" array={positions} count={COUNT*2} itemSize={3}/></bufferGeometry>
-    <lineBasicMaterial ref={matRef} color="#eaf0ff" transparent opacity={.95} blending={THREE.AdditiveBlending} depthWrite={false}/>
-  </lineSegments>)
-}
-
 // ═══ TEXTURE HELPER ═══
 function makeTex(sz=64,c=[1,1,1]){const cv=document.createElement('canvas');cv.width=cv.height=sz;const x=cv.getContext('2d'),g=x.createRadialGradient(sz/2,sz/2,0,sz/2,sz/2,sz/2);g.addColorStop(0,`rgba(${c[0]*255|0},${c[1]*255|0},${c[2]*255|0},1)`);g.addColorStop(.12,`rgba(${c[0]*255|0},${c[1]*255|0},${c[2]*255|0},.8)`);g.addColorStop(.35,`rgba(${c[0]*200|0},${c[1]*200|0},${c[2]*200|0},.25)`);g.addColorStop(.65,`rgba(${c[0]*120|0},${c[1]*120|0},${c[2]*120|0},.06)`);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,sz,sz);const t=new THREE.CanvasTexture(cv);t.needsUpdate=true;return t}
 
@@ -152,7 +105,7 @@ function smallSet(i){
   return set
 }
 
-const haloTex = makeTex(64, [.55, .65, .8])
+const haloTex = makeTex(64, [.55, .85, 2])
 const glowTex = makeTex(128, [1, 1, 1])
 function GlowSphere({d, onClick}){
   const ref = useRef(), [h, setH] = useState(false)
@@ -168,7 +121,7 @@ function GlowSphere({d, onClick}){
     const i = d.id % PLANET_TEXTURE_SETS.length
     const tint = SILVER_SHADES[d.id % SILVER_SHADES.length]
     if (d.f) {
-      const rep = 0.9 + ((d.id*97) % 125)/100 * 0.7
+      const rep = 0.9 + ((d.id*97) % 125)/100 * 0.8
       const rot = ((d.id*53) % 360) * Math.PI/180
       const set = PLANET_TEXTURE_SETS[i]
       return {
@@ -198,7 +151,7 @@ function GlowSphere({d, onClick}){
       <spriteMaterial map={glowTex} transparent opacity={d.f?.42:.55} blending={THREE.AdditiveBlending} depthWrite={false} color={d.f?'#ffffff':'#cfd6ee'}/>
     </sprite>
     <sprite scale={d.f?[d.sz*1.9,d.sz*1.9,1]:[Math.max(.32,d.sz*2.3),Math.max(.32,d.sz*2.3),1]} raycast={()=>null}>
-      <spriteMaterial map={glowTex} transparent opacity={d.f?.6:.75} blending={THREE.AdditiveBlending} depthWrite={false} color="#ffffff"/>
+      <spriteMaterial map={glowTex} transparent opacity={d.f?1:.75} blending={THREE.AdditiveBlending} depthWrite={false} color="#ffffff"/>
     </sprite>
   </group>)
 }
@@ -212,19 +165,31 @@ function OrbTrails(){
   const TRAIL_LEN=12
   const SEGS=TRAIL_LEN-1
   const ref=useRef()
+  const matRef=useRef()
   const history=useMemo(()=>SPHERES.map(()=>new Float32Array(TRAIL_LEN*3)),[])
   const seededRef=useRef(false)
   const total=SPHERES.length*SEGS
   const positions=useMemo(()=>new Float32Array(total*6),[total])
   const colors=useMemo(()=>new Float32Array(total*6),[total])
-  useFrame(({clock})=>{
-    if(!ref.current)return
+  useFrame(({clock},delta)=>{
+    if(!ref.current||!matRef.current)return
     const t=clock.getElapsedTime(),pr=intro.progress
+    // Hide while intro plays — orbs explode out from origin and the ring
+    // buffer would render as long radial lines back to the central pile.
+    // Also re-seed when the frame loop pauses (alt-tab) and resumes with
+    // a large delta; otherwise stale buffer entries connect old→new
+    // positions as long chord lines across the scene.
+    if(pr<1||delta>0.1){
+      seededRef.current=false
+      matRef.current.opacity=0
+      return
+    }
+    if(matRef.current.opacity<1)matRef.current.opacity=Math.min(1,matRef.current.opacity+delta*3)
     for(let i=0;i<SPHERES.length;i++){
       const d=SPHERES[i],tt=t*d.sp
-      const px=Math.cos(d.a+tt)*d.r*pr
-      const py=Math.sin(tt*.3+d.id*.5)*.1*pr
-      const pz=Math.sin(d.a+tt)*d.r*pr
+      const px=Math.cos(d.a+tt)*d.r
+      const py=Math.sin(tt*.3+d.id*.5)*.1
+      const pz=Math.sin(d.a+tt)*d.r
       const h=history[i]
       if(!seededRef.current){
         for(let k=0;k<TRAIL_LEN;k++){h[k*3]=px;h[k*3+1]=py;h[k*3+2]=pz}
@@ -254,7 +219,7 @@ function OrbTrails(){
       <bufferAttribute attach="attributes-position" array={positions} count={total*2} itemSize={3}/>
       <bufferAttribute attach="attributes-color" array={colors} count={total*2} itemSize={3}/>
     </bufferGeometry>
-    <lineBasicMaterial vertexColors transparent blending={THREE.AdditiveBlending} depthWrite={false}/>
+    <lineBasicMaterial ref={matRef} vertexColors transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false}/>
   </lineSegments>)
 }
 
@@ -278,14 +243,13 @@ const CosmicScene = memo(function CosmicScene({onOrbClick}){
     <fog attach="fog" args={['#020115',18,90]}/>
     <ambientLight intensity={14} color="#adbed1"/>
     <pointLight position={[-2,4,0]} intensity={10} color="#8090c0" distance={15} decay={15}/>
-    <pointLight position={[0,1,0]} intensity={0} color="#9bbad1d2" distance={1980} decay={2.5}/>
-    <pointLight position={[0,1,0]} intensity={0} color="#e0e4f0" distance={250} decay={2.5}/>
+    <pointLight position={[0,1,0]} intensity={5} color="#9bbad1d2" distance={1980} decay={2.5}/>
+    <pointLight position={[0,1,0]} intensity={.75} color="#e0e4f0" distance={250} decay={2.5}/>
     <pointLight position={[5,3,5]} intensity={1.5} color="#6878b0" distance={14} decay={2}/>
-    <pointLight position={[0,2,-5]} intensity={1} color="#5868a8" distance={12} decay={2}/>
+    <pointLight position={[0,2,-5]} intensity={0} color="#5868a8" distance={12} decay={2}/>
     <Environment preset="night"/>
     <Stars radius={25} depth={75} count={3500} factor={3.5} saturation={10} fade speed={.2}/>
     <IntroController/>
-    <ShootingStars/>
     <StarDust/>
     <Nebula/>
     <OrbitalParticles/>
@@ -293,7 +257,7 @@ const CosmicScene = memo(function CosmicScene({onOrbClick}){
     <EnergyLines/>
     {SPHERES.map(s=><GlowSphere key={s.id} d={s} onClick={onOrbClick}/>)}
     <EffectComposer>
-      <Bloom intensity={2.6} luminanceThreshold={1.15} luminanceSmoothing={.35} radius={.65}/>
+      <Bloom intensity={.5} luminanceThreshold={1.5} luminanceSmoothing={.35} radius={.65}/>
       <Vignette eskil={false} offset={.35} darkness={.55} blendFunction={BlendFunction.NORMAL}/>
     </EffectComposer>
   </>)
