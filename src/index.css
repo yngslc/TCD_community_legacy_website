@@ -99,9 +99,8 @@ html, body, #root {
 }
 @media (max-width: 768px) { .player-bar { width: 100%; min-width: unset; } }
 
-.progress-track { height: 5px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; cursor: pointer; touch-action: none; position: relative; user-select: none; }
-.progress-track::before { content: ''; position: absolute; inset: -10px 0; }
-.progress-fill { height: 100%; background: rgba(255,255,255,0.7); border-radius: 2px; position: relative; transition: width 0.08s linear; pointer-events: none; }
+.progress-track { height: 5px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; cursor: pointer; }
+.progress-fill { height: 100%; background: rgba(255,255,255,0.7); border-radius: 2px; position: relative; transition: width 0.1s linear; }
 .progress-fill::after {
   content: ''; position: absolute; right: -5px; top: 50%; transform: translateY(-50%);
   width: 10px; height: 10px; background: #fff; border-radius: 50%; box-shadow: 0 0 6px rgba(255,255,255,0.3);
