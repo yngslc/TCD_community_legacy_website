@@ -248,7 +248,7 @@ const CosmicScene = memo(function CosmicScene({onOrbClick}){
     <pointLight position={[5,3,5]} intensity={1.5} color="#6878b0" distance={14} decay={2}/>
     <pointLight position={[0,2,-5]} intensity={0} color="#5868a8" distance={12} decay={2}/>
     <Environment preset="night"/>
-    <Stars radius={25} depth={75} count={3500} factor={3.5} saturation={10} fade speed={.2}/>
+    <Stars radius={25} depth={100} count={3500} factor={3.5} saturation={10} fade speed={.2}/>
     <IntroController/>
     <StarDust/>
     <Nebula/>
